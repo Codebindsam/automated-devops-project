@@ -16,7 +16,12 @@ pipeline {
                 sh 'docker build -t automated-devops-app .'
             }
         }
-
+stage('Stop Existing Container') {
+    steps {
+        sh 'docker stop terraform-devops-container || true'
+        sh 'docker rm terraform-devops-container || true'
+    }
+}
         stage('Terraform Init') {
             steps {
                 sh 'terraform -chdir=terraform init'
