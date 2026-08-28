@@ -7,6 +7,7 @@ pipeline {
             steps {
                 sh 'docker --version'
                 sh 'python3 --version'
+                sh 'terraform --version'
             }
         }
 
@@ -16,23 +17,22 @@ pipeline {
             }
         }
 
-        stage('Stop Existing Container') {
+        stage('Terraform Init') {
             steps {
-                sh 'docker stop automated-devops-container || true'
-                sh 'docker rm automated-devops-container || true'
+                sh 'terraform -chdir=terraform init'
             }
         }
 
-        stage('Run Container') {
+        stage('Terraform Apply') {
             steps {
-                sh 'docker run -d --name automated-devops-container -p 5000:5000 automated-devops-app'
+                sh 'terraform -chdir=terraform apply -auto-approve'
             }
         }
 
         stage('Health Check') {
             steps {
                 sh 'sleep 5'
-                sh 'curl -f http://localhost:5000/health'
+                sh 'curl -f http://localhost:5001/health'
             }
         }
     }
