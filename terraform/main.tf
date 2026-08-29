@@ -9,13 +9,14 @@ terraform {
 
 provider "docker" {}
 
-data "docker_image" "app" {
-  name = "automated-devops-app:latest"
+resource "docker_image" "app" {
+  name         = "automated-devops-app:latest"
+  keep_locally = true
 }
 
 resource "docker_container" "app" {
   name  = "terraform-devops-container"
-  image = data.docker_image.app.image_id
+  image = docker_image.app.image_id
 
   ports {
     internal = 5000
