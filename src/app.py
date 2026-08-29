@@ -7,39 +7,57 @@ app = Flask(__name__)
 def home():
     return """
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
         <title>Automated DevOps Deployment Framework</title>
+
         <style>
+            * {
+                box-sizing: border-box;
+            }
+
             body {
+                margin: 0;
                 font-family: Arial, sans-serif;
                 background: #f4f7fb;
-                margin: 0;
-                padding: 0;
                 color: #1f2937;
             }
 
             .header {
                 background: #172554;
                 color: white;
-                padding: 30px;
                 text-align: center;
+                padding: 45px 20px;
             }
 
             .header h1 {
                 margin: 0;
-                font-size: 32px;
+                font-size: 36px;
             }
 
             .header p {
-                margin-top: 10px;
-                font-size: 17px;
+                margin-top: 12px;
+                font-size: 18px;
             }
 
             .container {
                 max-width: 1100px;
                 margin: 40px auto;
-                padding: 20px;
+                padding: 0 20px;
+            }
+
+            .status {
+                background: #dcfce7;
+                color: #166534;
+                padding: 16px;
+                border-radius: 10px;
+                text-align: center;
+                margin-bottom: 35px;
+                font-weight: bold;
+                font-size: 18px;
             }
 
             .card-container {
@@ -51,10 +69,10 @@ def home():
 
             .card {
                 background: white;
-                width: 280px;
+                width: 300px;
                 padding: 25px;
                 border-radius: 12px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             }
 
             .card h2 {
@@ -67,22 +85,12 @@ def home():
                 color: #4b5563;
             }
 
-            .status {
-                background: #dcfce7;
-                color: #166534;
-                padding: 15px;
-                border-radius: 8px;
-                text-align: center;
-                margin-bottom: 30px;
-                font-weight: bold;
-            }
-
             .workflow {
                 background: white;
                 margin-top: 40px;
                 padding: 30px;
                 border-radius: 12px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             }
 
             .workflow h2 {
@@ -99,7 +107,7 @@ def home():
                 background: #172554;
                 color: white;
                 text-align: center;
-                padding: 20px;
+                padding: 25px;
             }
         </style>
     </head>
@@ -176,7 +184,7 @@ def home():
                     <li>Developer commits application source code.</li>
                     <li>GitHub stores and manages the source code.</li>
                     <li>Terraform provisions the required infrastructure.</li>
-                    <li>Jenkins automatically executes the CI/CD pipeline.</li>
+                    <li>Jenkins executes the CI/CD pipeline.</li>
                     <li>Docker builds and packages the application.</li>
                     <li>The container is deployed to Kubernetes.</li>
                     <li>Prometheus collects application and infrastructure metrics.</li>
@@ -187,7 +195,8 @@ def home():
         </div>
 
         <footer>
-            Automated DevOps Deployment Framework | CI/CD | Docker | Kubernetes | Monitoring
+            Automated DevOps Deployment Framework |
+            CI/CD | Docker | Kubernetes | Monitoring
         </footer>
 
     </body>
