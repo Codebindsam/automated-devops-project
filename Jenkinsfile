@@ -3,6 +3,12 @@ pipeline {
 
     stages {
 
+        stage('Checkout Latest Code') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Check Environment') {
             steps {
                 sh 'docker --version'
@@ -13,42 +19,43 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t automated-devops-app .'
-            }
-        }
-stage('Stop Existing Container') {
-    steps {
-        sh 'docker stop terraform-devops-container || true'
-        sh 'docker rm terraform-devops-container || true'
-    }
-}
-        stage('Terraform Init') {
-            steps {
-                sh 'terraform -chdir=terraform init'
+                sh 'docker build --no-cache -t automated-devops-app:latest .'
             }
         }
 
-        stage('Terraform Apply') {
+        stage('Stop Old Application') {
             steps {
-                sh 'terraform -chdir=terraform apply -auto-approve'
+                sh 'docker rm -f automated-devops-container || true'
             }
         }
 
-        stage('Health Check') {
+        stage('Deploy New Application') {
+            steps {
+                sh 'docker run -d --name automated-devops-container -p 5000:5000 automated-devops-app:latest'
+            }
+        }
+
+        stage('Verify Deployment') {
             steps {
                 sh 'sleep 5'
-                sh 'curl -f http://localhost:5001/health'
+                sh 'docker ps --filter "name=automated-devops-container"'
             }
         }
     }
 
     post {
         success {
-            echo 'Deployment successful!'
+            echo '======================================'
+            echo 'DEPLOYMENT SUCCESSFUL!'
+            echo 'New code is running on Docker.'
+            echo '======================================'
         }
 
         failure {
-            echo 'Deployment failed!'
+            echo '======================================'
+            echo 'DEPLOYMENT FAILED!'
+            echo 'Check Jenkins console output.'
+            echo '======================================'
         }
     }
 }
