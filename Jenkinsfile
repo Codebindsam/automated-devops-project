@@ -17,43 +17,43 @@ pipeline {
             }
         }
 
-        stage('Terraform Infrastructure') {
-            steps {
-                sh 'terraform -chdir=terraform init'
-                sh 'terraform -chdir=terraform apply -auto-approve'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                sh 'docker build --no-cache -t automated-devops-app:latest .'
-            }
-        }
-
-        stage('Stop Old Application') {
-            steps {
-                sh 'docker stop automated-devops-container || true'
-                sh 'docker rm automated-devops-container || true'
-            }
-        }
-
-        stage('Deploy New Application') {
-            steps {
                 sh '''
-                    docker run -d \
-                      --name automated-devops-container \
-                      --network automated-devops-network \
-                      -p 5000:5000 \
-                      automated-devops-app:latest
+                    echo "Building latest Docker image..."
+                    docker build --no-cache -t automated-devops-app:latest .
+                    docker images | grep automated-devops-app
                 '''
             }
         }
 
-        stage('Health Check') {
+        stage('Terraform Init') {
             steps {
                 sh '''
+                    terraform -chdir=terraform init
+                '''
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                sh '''
+                    terraform -chdir=terraform apply -auto-approve
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                    echo "Waiting for application..."
                     sleep 5
-                    curl -f http://localhost:5000/health
+
+                    echo "Testing application..."
+                    curl -f http://localhost:5001
+
+                    echo ""
+                    echo "Deployment successful!"
                 '''
             }
         }
@@ -61,11 +61,15 @@ pipeline {
 
     post {
         success {
-            echo 'Deployment successful!'
+            echo '========================================'
+            echo ' CI/CD PIPELINE COMPLETED SUCCESSFULLY '
+            echo '========================================'
         }
 
         failure {
-            echo 'Deployment failed!'
+            echo '========================================'
+            echo '       CI/CD PIPELINE FAILED            '
+            echo '========================================'
         }
     }
 }
