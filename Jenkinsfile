@@ -1,12 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = 'automated-devops-app'
-        CONTAINER_NAME = 'automated-devops-container'
-        APP_PORT = '5000'
-    }
-
     stages {
 
         stage('Checkout Latest Code') {
@@ -23,52 +17,43 @@ pipeline {
             }
         }
 
+        stage('Terraform Infrastructure') {
+            steps {
+                sh 'terraform -chdir=terraform init'
+                sh 'terraform -chdir=terraform apply -auto-approve'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
-                sh '''
-                    echo "Building Docker image from latest GitHub code..."
-
-                    docker build --no-cache \
-                        -t ${IMAGE_NAME}:build-${BUILD_NUMBER} \
-                        -t ${IMAGE_NAME}:latest .
-                '''
+                sh 'docker build --no-cache -t automated-devops-app:latest .'
             }
         }
 
         stage('Stop Old Application') {
             steps {
-                sh '''
-                    echo "Stopping old container..."
-
-                    docker rm -f ${CONTAINER_NAME} || true
-                '''
+                sh 'docker stop automated-devops-container || true'
+                sh 'docker rm automated-devops-container || true'
             }
         }
 
         stage('Deploy New Application') {
             steps {
                 sh '''
-                    echo "Starting new container..."
-
                     docker run -d \
-                        --name ${CONTAINER_NAME} \
-                        -p ${APP_PORT}:5000 \
-                        ${IMAGE_NAME}:build-${BUILD_NUMBER}
+                      --name automated-devops-container \
+                      --network automated-devops-network \
+                      -p 5000:5000 \
+                      automated-devops-app:latest
                 '''
             }
         }
 
-        stage('Verify Deployment') {
+        stage('Health Check') {
             steps {
                 sh '''
-                    echo "Waiting for application..."
                     sleep 5
-
-                    echo "Checking application health..."
                     curl -f http://localhost:5000/health
-
-                    echo ""
-                    echo "Application deployed successfully!"
                 '''
             }
         }
@@ -76,17 +61,11 @@ pipeline {
 
     post {
         success {
-            echo '======================================'
-            echo 'DEPLOYMENT SUCCESSFUL'
-            echo '======================================'
-            echo "Application: http://localhost:5000"
-            echo "Docker Image: ${IMAGE_NAME}:build-${BUILD_NUMBER}"
+            echo 'Deployment successful!'
         }
 
         failure {
-            echo '======================================'
-            echo 'DEPLOYMENT FAILED'
-            echo '======================================'
+            echo 'Deployment failed!'
         }
     }
 }
