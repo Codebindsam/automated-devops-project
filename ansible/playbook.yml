@@ -1,0 +1,53 @@
+---
+- name: Configure Automated DevOps Application
+  hosts: local
+  connection: local
+  become: false
+
+  tasks:
+
+    - name: Display Ansible execution message
+      ansible.builtin.debug:
+        msg: "Ansible automation is running successfully"
+
+    - name: Check Docker installation
+      ansible.builtin.command:
+        cmd: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Display Docker version
+      ansible.builtin.debug:
+        var: docker_version.stdout
+
+    - name: Check Kubernetes client
+      ansible.builtin.command:
+        cmd: kubectl version --client
+      register: kubectl_version
+      changed_when: false
+
+    - name: Display Kubernetes version
+      ansible.builtin.debug:
+        var: kubectl_version.stdout
+
+    - name: Deploy application to Kubernetes
+      ansible.builtin.command:
+        cmd: kubectl apply -f kubernetes/deployment.yaml -f kubernetes/service.yaml
+        chdir: /home/samreen_alam/docker-project/application
+      register: kubernetes_deployment
+      changed_when: true
+
+    - name: Display Kubernetes deployment result
+      ansible.builtin.debug:
+        var: kubernetes_deployment.stdout
+
+    - name: Check application deployment
+      ansible.builtin.command:
+        cmd: kubectl get deployment automated-devops-app
+        chdir: /home/samreen_alam/docker-project/application
+      register: deployment_status
+      changed_when: false
+
+    - name: Display application deployment status
+      ansible.builtin.debug:
+        var: deployment_status.stdout

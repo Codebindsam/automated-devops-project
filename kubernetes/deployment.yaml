@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: automated-devops-app
+  labels:
+    app: automated-devops-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: automated-devops-app
+  template:
+    metadata:
+      labels:
+        app: automated-devops-app
+    spec:
+      containers:
+        - name: automated-devops-app
+          image: automated-devops-app:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 20
