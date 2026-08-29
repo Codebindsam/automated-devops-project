@@ -16,7 +16,7 @@ resource "docker_image" "app" {
 
 resource "docker_container" "app" {
   name  = "automated-devops-container"
-  image = "automated-devops-app:latest"
+  image = docker_image.app.image_id
 
   ports {
     internal = 5000

@@ -20,9 +20,18 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    echo "Building latest Docker image..."
+                    echo "Building Docker image..."
                     docker build --no-cache -t automated-devops-app:latest .
                     docker images | grep automated-devops-app
+                '''
+            }
+        }
+
+        stage('Prepare Container') {
+            steps {
+                sh '''
+                    echo "Removing old container if it exists..."
+                    docker rm -f automated-devops-container 2>/dev/null || true
                 '''
             }
         }
@@ -49,11 +58,11 @@ pipeline {
                     echo "Waiting for application..."
                     sleep 5
 
-                    echo "Testing application..."
-                    curl -f http://localhost:5001
+                    echo "Checking container..."
+                    docker ps --filter "name=automated-devops-container"
 
-                    echo ""
-                    echo "Deployment successful!"
+                    echo "Checking application health..."
+                    curl -f http://localhost:5001/health
                 '''
             }
         }
@@ -61,15 +70,19 @@ pipeline {
 
     post {
         success {
-            echo '========================================'
-            echo ' CI/CD PIPELINE COMPLETED SUCCESSFULLY '
-            echo '========================================'
+            echo '''
+            ========================================
+                  CI/CD PIPELINE SUCCESSFUL
+            ========================================
+            '''
         }
 
         failure {
-            echo '========================================'
-            echo '       CI/CD PIPELINE FAILED            '
-            echo '========================================'
+            echo '''
+            ========================================
+                  CI/CD PIPELINE FAILED
+            ========================================
+            '''
         }
     }
 }
