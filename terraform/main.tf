@@ -15,11 +15,15 @@ resource "docker_image" "app" {
 }
 
 resource "docker_container" "app" {
-  name  = "terraform-devops-container"
-  image = docker_image.app.image_id
+  name  = "automated-devops-container"
+  image = "automated-devops-app:latest"
 
   ports {
     internal = 5000
     external = 5001
   }
+
+  depends_on = [
+    docker_image.app
+  ]
 }
