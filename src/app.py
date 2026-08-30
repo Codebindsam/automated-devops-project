@@ -122,7 +122,7 @@ def home():
         <div class="container">
 
             <div class="status">
-                ✓ Application is running successfully 
+                ✓ Application is running successfully CI/CD Pipeline Live
             </div>
 
             <div class="card-container">
